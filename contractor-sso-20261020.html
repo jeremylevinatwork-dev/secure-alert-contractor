@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en" data-build="contractor-20261020-1846">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Secure Alert — Contractor Portal</title>
+<style>
+  :root{ --navy:#1a365d; --navy2:#0f2440; --gold:#c9a227; --gold2:#d4af37; --ink:#2d3748; --line:#e2e8f0; --red:#c53030; --green:#276749; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#eef1f5; color:var(--ink); }
+  header{ background:linear-gradient(180deg,var(--navy) 0%,var(--navy2) 100%); color:#fff; padding:14px 16px 12px; border-bottom:3px solid var(--gold); }
+  header .logos{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  header img{ height:40px; width:auto; background:#fff; border-radius:8px; padding:3px 6px; }
+  header h1{ font-size:20px; margin:0; letter-spacing:.2px; }
+  header .sub{ color:var(--gold2); font-weight:700; font-size:13px; margin-top:2px; }
+  header .who{ margin-left:auto; text-align:right; font-size:13px; color:#dbe4f0; }
+  header .who button{ margin-top:4px; }
+  .power{ background:#111; color:#f5d76e; text-align:center; font-style:italic; font-weight:700; padding:5px; font-size:13px; letter-spacing:.4px; }
+  main{ max-width:860px; margin:0 auto; padding:14px 12px 40px; }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:14px; box-shadow:0 1px 4px rgba(15,36,64,.06); }
+  .card h2{ margin:0 0 4px; font-size:18px; color:var(--navy); }
+  .note{ color:#4a5568; font-size:13.5px; }
+  label{ display:block; font-weight:700; font-size:13.5px; color:var(--navy); margin:10px 0 4px; }
+  input{ width:100%; padding:11px; border:1.5px solid #cbd5e0; border-radius:10px; font-size:16px; }
+  .btn{ display:inline-block; border:none; border-radius:10px; padding:11px 18px; font-size:15.5px; font-weight:800; cursor:pointer; }
+  .btn-gold{ background:var(--gold); color:#1a202c; }
+  .btn-navy{ background:var(--navy); color:#fff; }
+  .btn-ghost{ background:#fff; border:1.5px solid var(--navy); color:var(--navy); }
+  .btn-sm{ padding:7px 12px; font-size:13.5px; }
+  .err{ color:var(--red); font-weight:700; min-height:20px; }
+  table{ width:100%; border-collapse:collapse; font-size:14.5px; }
+  th{ text-align:left; color:var(--navy); border-bottom:2px solid var(--gold); padding:6px 6px; font-size:13px; }
+  td{ border-bottom:1px solid var(--line); padding:7px 6px; vertical-align:top; }
+  .shiphead{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:baseline; }
+  .shiphead .when{ font-size:19px; font-weight:800; color:var(--navy); }
+  .recv{ background:#e9f7ef; border:1.5px solid #9ae6b4; color:var(--green); border-radius:10px; padding:10px 12px; font-weight:800; margin-top:10px; }
+  .fedex{ background:#f7f3e3; border:1px solid #e8dcc0; border-radius:10px; padding:9px 12px; margin:10px 0; font-size:14.5px; }
+  .fedex a{ color:#2b6cb0; font-weight:800; }
+  .filebtn{ margin:4px 6px 0 0; }
+  .empty{ text-align:center; color:#718096; padding:26px 10px; font-size:15.5px; }
+  #viewer{ display:none; position:fixed; inset:0; background:rgba(13,27,46,.94); z-index:50; padding:14px; }
+  #viewer .box{ background:#fff; border-radius:12px; height:100%; display:flex; flex-direction:column; overflow:hidden; }
+  #viewer .bar{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:2px solid var(--gold); }
+  #viewer .body{ flex:1; overflow:auto; text-align:center; }
+  #viewer img{ max-width:100%; }
+  #viewer iframe{ width:100%; height:100%; border:none; }
+  .foot{ text-align:center; color:#718096; font-size:12.5px; padding:10px; }
+  #printArea{ display:none; }
+  @media print{ body > *:not(#printArea){ display:none !important; } body > #printArea{ display:block !important; } }
+</style>
+</head>
+<body>
+<script>
+/* self-update guard */
+(function(){ try{
+  if(sessionStorage.getItem('ctr')) return;
+  fetch(location.href.split('?')[0] + '?v=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.text(); }).then(function(t){
+    var m = t.match(/data-build="([^"]+)"/);
+    var mine = document.documentElement.getAttribute('data-build');
+    if(m && mine && m[1] !== mine && !sessionStorage.getItem('ctb')){ sessionStorage.setItem('ctb','1'); location.reload(); }
+    sessionStorage.setItem('ctr','1');
+  }).catch(function(){});
+}catch(e){} })();
+</script>
+<header>
+  <div class="logos">
+    <img src="https://jeremylevinatwork-dev.github.io/secure-alert/loews-logo-trim.jpg" alt="Loews Hotels">
+    <img src="https://jeremylevinatwork-dev.github.io/secure-alert/securalert-logo.jpg" alt="SecurAlert">
+    <div>
+      <h1>Secure Alert — Contractor Portal</h1>
+      <div class="sub">Fob shipments from Loews Hotels Security Orlando</div>
+    </div>
+    <div class="who" id="whoBox"></div>
+  </div>
+</header>
+<main id="main"><div class="empty">Loading…</div></main>
+<div class="foot">Produced by: JHNL Security Tech · Secure Alert shipments only</div>
+
+<div id="viewer"><div class="box">
+  <div class="bar"><b id="viewerName">File</b><span><a id="viewerOpen" href="#" target="_blank" rel="noopener" style="color:#2b6cb0;font-weight:800;margin-right:12px;">Open</a><button class="btn btn-navy btn-sm" onclick="closeViewer()">Close</button></span></div>
+  <div class="body" id="viewerBody"></div>
+</div></div>
+
+<script>
+const SB_URL = 'https://qxqrwusaynfqadjfqswe.supabase.co';
+const SB_KEY = 'sb_publishable_2ba9yzEA89uqXHJ6v-_cQg_AmwwEfFF';
+const ROW_ID = 'secure-alert-state';
+let S = null;              // secure-alert state (fresh from cloud)
+let mode = null;           // 'team' | 'contractor'
+let contractorName = sessionStorage.getItem('contractorName') || '';
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function nowLocal(){ const d = new Date(); const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); }
+function fmtDT(s){ if(!s) return '—'; const d = new Date(s); return isNaN(d) ? esc(s) : d.toLocaleString('en-US', {month:'numeric', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'}); }
+function propName(c){ return (S.propNames && S.propNames[c]) || c; }
+
+async function pull(){
+  const res = await fetch(SB_URL + '/rest/v1/app_records?id=eq.' + ROW_ID + '&select=data', { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }, cache: 'no-store' });
+  if(!res.ok) throw new Error('load failed');
+  const rows = await res.json();
+  S = (rows && rows[0] && rows[0].data) || {};
+  if(!Array.isArray(S.fobs)) S.fobs = [];
+  if(!Array.isArray(S.contractors)) S.contractors = [];
+  if(!Array.isArray(S.team)) S.team = [];
+}
+async function push(){
+  const payload = JSON.parse(JSON.stringify(S));
+  payload.session = null;
+  payload._ts = Date.now();
+  const res = await fetch(SB_URL + '/rest/v1/app_records', { method: 'POST', headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' }, body: JSON.stringify({ id: ROW_ID, app: 'secure-alert', data: payload }) });
+  if(!res.ok) throw new Error('save failed');
+}
+
+function shipments(){
+  const groups = {};
+  S.fobs.forEach(f => {
+    if(!f.shipTracking || f.shipId) return;
+    const k = String(f.shipTracking).trim();
+    (groups[k] = groups[k] || []).push(f);
+  });
+  return Object.keys(groups).map(k => {
+    const g = groups[k];
+    const when = g.map(f => f.shipWhen || '').sort().slice(-1)[0];
+    return { tracking: k, fobs: g, when: when };
+  }).sort((a, b) => String(b.when).localeCompare(String(a.when)));
+}
+
+function render(){
+  const who = document.getElementById('whoBox');
+  const main = document.getElementById('main');
+  if(mode === 'team'){
+    const nm = localStorage.getItem('loewsUser') || '';
+    who.innerHTML = 'Team view' + (nm ? ' — ' + esc(nm) : '') + '<br><button class="btn btn-ghost btn-sm" onclick="refresh()">↻ Refresh</button>';
+  } else if(mode === 'contractor'){
+    who.innerHTML = esc(contractorName) + '<br><button class="btn btn-gold" style="width:auto;padding:11px 22px;font-size:16px;margin-top:4px" onclick="logout()">Log out</button> <button class="btn btn-ghost btn-sm" onclick="refresh()">↻ Refresh</button>';
+  }
+  const list = shipments();
+  const sgroups = shipGroups();
+  let h = '';
+  if(!list.length && !sgroups.length){
+    h += '<div class="card"><div class="empty">No shipments yet.<br>When Loews ships fobs to SecurAlert, they will appear here.</div></div>';
+  }
+  sgroups.forEach(sg => { h += shipCard(sg); });
+  list.forEach(sh => {
+    const hotels = [...new Set(sh.fobs.map(f => propName(f.prop)))].join(', ');
+    const tickets = [...new Set(sh.fobs.map(f => f.sentRpt).filter(Boolean))];
+    const received = sh.fobs.find(f => f.receivedAt);
+    h += '<div class="card">';
+    h += '<div class="shiphead"><span class="when">🚚 Shipped ' + esc(fmtDT(sh.when)) + '</span><span class="note">' + esc(hotels) + (tickets.length ? ' · Ticket ' + esc(tickets.join(', ')) : '') + '</span></div>';
+    h += '<div class="fedex">FedEx tracking: <a href="https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(sh.tracking) + '" target="_blank" rel="noopener">' + esc(sh.tracking) + '</a> — tap to track the package</div>';
+    h += '<table><tr><th>FOB ID</th><th>Fob number</th><th>Repair request date</th><th>Shipped out</th></tr>';
+    sh.fobs.slice().sort((a, b) => String(a.fobId).localeCompare(String(b.fobId))).forEach(f => {
+      h += '<tr><td><b>' + esc(f.fobId) + '</b></td><td>' + esc(f.num || '—') + '</td><td>' + esc(f.sentWhen || '—') + '</td><td>' + esc(fmtDT(f.shipWhen)) + '</td></tr>';
+    });
+    h += '</table>';
+    const files = [];
+    sh.fobs.forEach(f => (f.files || []).forEach((dc, i) => { if(dc.tag === 'FedEx') files.push({ uid: f.uid, i: i, name: dc.name || 'FedEx file' }); }));
+    if(files.length){
+      h += '<div style="margin-top:8px;">' + files.map(x => '<button class="btn btn-ghost btn-sm filebtn" onclick="viewFile(\'' + x.uid + '\',' + x.i + ')">📎 FedEx file — ' + esc(x.name) + '</button>').join('') + '</div>';
+    }
+    h += shipActions(esc(sh.tracking));
+    if(received){
+      h += '<div class="recv">✓ Shipment received ' + esc(fmtDT(received.receivedAt)) + (received.receivedBy ? ' — marked by ' + esc(received.receivedBy) : '') + '</div>';
+    } else if(mode === 'contractor'){
+      h += '<div style="margin-top:12px;"><button class="btn btn-gold" onclick="markReceived(\'' + esc(sh.tracking) + '\')">✓ Shipment received</button></div>';
+    } else {
+      h += '<div class="note" style="margin-top:10px;">Not yet marked received.</div>';
+    }
+    h += '</div>';
+  });
+  if(mode === 'contractor'){
+    h += '<button class="btn btn-gold" style="width:100%;padding:15px;font-size:18px;margin-top:6px" onclick="logout()">Log out</button>'
+      + '<div class="note" style="text-align:center;margin-top:8px">Logged in as ' + esc(contractorName) + ' — log out when you are done.</div>';
+  }
+  main.innerHTML = h;
+}
+
+function loginHtml(msg){
+  document.getElementById('whoBox').innerHTML = '';
+  document.getElementById('main').innerHTML =
+    '<div class="card" style="max-width:430px;margin:26px auto;"><h2>Contractor login</h2>' +
+    '<p class="note">For SecurAlert shipment viewing. Use the name and PIN given to you by Loews Hotels Security.</p>' +
+    '<label>Your name</label><input type="text" id="ct-name" autocomplete="off" placeholder="Name on your access">' +
+    '<label>PIN</label><input type="password" id="ct-pin" inputmode="numeric" maxlength="4" placeholder="••••" onkeydown="if(event.key===\'Enter\') doLogin()">' +
+    '<p class="err" id="ct-err">' + esc(msg || '') + '</p>' +
+    '<button class="btn btn-navy" style="width:100%" onclick="doLogin()">Log in</button></div>';
+}
+async function doLogin(){
+  const name = document.getElementById('ct-name').value.trim();
+  const pin = document.getElementById('ct-pin').value.trim();
+  const err = document.getElementById('ct-err');
+  try{ await pull(); }catch(e){ err.textContent = 'Could not load — check connection and try again.'; return; }
+  const hit = S.contractors.find(c => (c.name || '').toLowerCase() === name.toLowerCase() && c.pin === pin);
+  if(!hit){ err.textContent = 'Name or PIN not recognized.'; return; }
+  contractorName = hit.name;
+  sessionStorage.setItem('contractorName', contractorName);
+  mode = 'contractor';
+  render();
+}
+function logout(){ contractorName = ''; sessionStorage.removeItem('contractorName'); mode = null; loginHtml(''); }
+async function refresh(){ try{ await pull(); if(mode) render(); }catch(e){} }
+
+function shipGroups(){
+  const ships = (S.shipments || []).slice().sort((a, b) => (a.status === b.status ? String(b.createdAt || '').localeCompare(String(a.createdAt || '')) : (a.status === 'preparing' ? -1 : 1)));
+  return ships.map(sh => ({ sh: sh, fobs: S.fobs.filter(f => f.shipId === sh.uid) })).filter(g => g.fobs.length || g.sh.status === 'preparing');
+}
+function shipCard(g){
+  const sh = g.sh, fin = sh.status === 'finalized';
+  const hotels = [...new Set(g.fobs.map(f => propName(f.prop)))].join(', ');
+  const tickets = [...new Set(g.fobs.map(f => f.sentRpt).filter(Boolean))];
+  const received = g.fobs.find(f => f.receivedAt);
+  let h = '<div class="card">';
+  h += '<div class="shiphead"><span class="when">' + (fin ? '🚚 Shipped ' + esc(fmtDT(sh.finalizedAt)) : '📦 Being prepared') + '</span><span style="display:inline-block;padding:2px 10px;border-radius:999px;font-weight:800;font-size:12px;color:#fff;background:' + (fin ? '#276749' : '#B7791F') + '">' + (fin ? '✓ FINALIZED' : 'BEING PREPARED') + '</span></div>';
+  h += '<div class="note" style="margin-bottom:6px;">' + esc(hotels) + (tickets.length ? ' · Ticket ' + esc(tickets.join(', ')) : '') + '<br>Started ' + esc(fmtDT(sh.createdAt)) + (sh.createdBy ? ' by ' + esc(sh.createdBy) : '') + (fin ? ' · Shipped out ' + esc(fmtDT(sh.finalizedAt)) : '') + '</div>';
+  if(sh.tracking) h += '<div class="fedex">FedEx tracking: <a href="https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(sh.tracking) + '" target="_blank" rel="noopener">' + esc(sh.tracking) + '</a> — tap to track the package</div>';
+  else h += '<div class="fedex">FedEx tracking number to come.</div>';
+  if(g.fobs.length){
+    h += '<table><tr><th>FOB ID</th><th>Fob number</th><th>Repair request date</th><th>Shipped out</th></tr>';
+    g.fobs.slice().sort((a, b) => String(a.fobId).localeCompare(String(b.fobId))).forEach(f => {
+      h += '<tr><td><b>' + esc(f.fobId) + '</b></td><td>' + esc(f.num || '—') + '</td><td>' + esc(f.sentWhen || '—') + '</td><td>' + (fin ? esc(fmtDT(sh.finalizedAt)) : '—') + '</td></tr>';
+    });
+    h += '</table>';
+  } else {
+    h += '<div class="empty">Fobs are being packed — the list will appear here.</div>';
+  }
+  const files = [];
+  (sh.files || []).forEach((dc, i) => files.push({ ship: sh.uid, i: i, name: dc.name || 'FedEx file' }));
+  g.fobs.forEach(f => (f.files || []).forEach((dc, i) => { if(dc.tag === 'FedEx') files.push({ uid: f.uid, i: i, name: dc.name || 'FedEx file' }); }));
+  if(files.length){
+    h += '<div style="margin-top:8px;">' + files.map(x => x.ship
+      ? '<button class="btn btn-ghost btn-sm filebtn" onclick="viewShipFile(\'' + x.ship + '\',' + x.i + ')">📎 FedEx file — ' + esc(x.name) + '</button>'
+      : '<button class="btn btn-ghost btn-sm filebtn" onclick="viewFile(\'' + x.uid + '\',' + x.i + ')">📎 FedEx file — ' + esc(x.name) + '</button>').join('') + '</div>';
+  }
+  h += shipActions('shp:' + sh.uid);
+  if(fin){
+    if(received){
+      h += '<div class="recv">✓ Shipment received ' + esc(fmtDT(received.receivedAt)) + (received.receivedBy ? ' — marked by ' + esc(received.receivedBy) : '') + '</div>';
+    } else if(mode === 'contractor'){
+      h += '<div style="margin-top:12px;"><button class="btn btn-gold" onclick="markShipmentReceived(\'' + sh.uid + '\')">✓ Shipment received</button></div>';
+    } else {
+      h += '<div class="note" style="margin-top:10px;">Not yet marked received.</div>';
+    }
+  } else {
+    h += '<div class="note" style="margin-top:10px;">This shipment is being prepared by Loews — it has not shipped yet.</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+async function markShipmentReceived(uid){
+  if(!confirm('Mark this shipment as received now? This stamps the date and time.')) return;
+  try{
+    await pull();  // fresh state first — never stamp onto a stale copy
+    const sh = (S.shipments || []).find(s => s.uid === uid);
+    if(!sh){ alert('That shipment could not be found — refresh and try again.'); render(); return; }
+    const stamp = nowLocal();
+    let hit = 0;
+    S.fobs.forEach(f => { if(f.shipId === uid && !f.receivedAt){ f.receivedAt = stamp; f.receivedBy = contractorName; hit++; } });
+    if(!hit){ alert('This shipment was already marked received.'); render(); return; }
+    await push();
+    await pull();
+    render();
+  }catch(e){ alert('Could not save — check connection and try again.'); }
+}
+
+function viewShipFile(sid, i){
+  const sh = (S.shipments || []).find(s => s.uid === sid); if(!sh || !sh.files || !sh.files[i]) return;
+  showDoc(sh.files[i]);
+}
+
+/* ===== Print / email a shipment ===== */
+function shipModel(key){
+  if(key.indexOf('shp:') === 0){
+    const sh = (S.shipments || []).find(s => s.uid === key.slice(4)); if(!sh) return null;
+    const fobs = S.fobs.filter(f => f.shipId === sh.uid);
+    const fin = sh.status === 'finalized';
+    return { key: key, sh: sh, fobs: fobs, fin: fin, tracking: sh.tracking || '',
+      hotels: [...new Set(fobs.map(f => propName(f.prop)))].join(', '),
+      tickets: [...new Set(fobs.map(f => f.sentRpt).filter(Boolean))].join(', '),
+      statusLine: fin ? 'Finalized — shipped out ' + fmtDT(sh.finalizedAt) : 'Being prepared — not shipped yet',
+      shippedStr: fin ? fmtDT(sh.finalizedAt) : '—',
+      received: fobs.find(f => f.receivedAt) || null };
+  }
+  const fobs = S.fobs.filter(f => String(f.shipTracking || '').trim() === key && !f.shipId);
+  if(!fobs.length) return null;
+  const when = fobs.map(f => f.shipWhen || '').sort().slice(-1)[0];
+  return { key: key, sh: null, fobs: fobs, fin: true, tracking: key,
+    hotels: [...new Set(fobs.map(f => propName(f.prop)))].join(', '),
+    tickets: [...new Set(fobs.map(f => f.sentRpt).filter(Boolean))].join(', '),
+    statusLine: 'Shipped out ' + fmtDT(when), shippedStr: fmtDT(when),
+    received: fobs.find(f => f.receivedAt) || null };
+}
+function shipActions(key){
+  const ek = key.replace(/'/g, '');
+  return '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">'
+    + '<button class="btn btn-ghost btn-sm" onclick="printShip(\'' + ek + '\')">🖨 Print</button>'
+    + '<button class="btn btn-ghost btn-sm" onclick="toggleShipEmail(\'' + ek + '\')">✉️ Email</button></div>'
+    + '<div id="em-' + ek.replace(/[^A-Za-z0-9]/g, '_') + '" style="display:none;margin-top:8px;">'
+    + '<label>Email this shipment to</label><input type="email" id="emto-' + ek.replace(/[^A-Za-z0-9]/g, '_') + '" placeholder="name@example.com" style="margin-bottom:8px;">'
+    + '<button class="btn btn-navy btn-sm" onclick="sendShipEmail(\'' + ek + '\')">Send email</button>'
+    + '<span class="note" id="emmsg-' + ek.replace(/[^A-Za-z0-9]/g, '_') + '" style="margin-left:8px;"></span></div>';
+}
+function toggleShipEmail(key){
+  const el = document.getElementById('em-' + key.replace(/[^A-Za-z0-9]/g, '_'));
+  if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function shipTableHtml(m){
+  const th = 'style="border:1px solid #CBD5E0;padding:7px 9px;background:#1A365D;color:#fff;text-align:left;font-size:13px"';
+  const td = 'style="border:1px solid #CBD5E0;padding:7px 9px;font-size:13px"';
+  return '<table style="border-collapse:collapse;width:100%"><tr><th ' + th + '>FOB ID</th><th ' + th + '>Fob number</th><th ' + th + '>Repair request date</th><th ' + th + '>Shipped out</th></tr>'
+    + m.fobs.slice().sort((a, b) => String(a.fobId).localeCompare(String(b.fobId))).map(f => '<tr><td ' + td + '><b>' + esc(f.fobId) + '</b></td><td ' + td + '>' + esc(f.num || '—') + '</td><td ' + td + '>' + esc(f.sentWhen || '—') + '</td><td ' + td + '>' + esc(m.shippedStr) + '</td></tr>').join('') + '</table>';
+}
+function shipText(m){
+  return 'Secure Alert shipment — Loews Hotels Security Orlando\n'
+    + 'Hotel: ' + m.hotels + (m.tickets ? '\nTicket: ' + m.tickets : '')
+    + '\nStatus: ' + m.statusLine
+    + (m.tracking ? '\nFedEx tracking: ' + m.tracking + '\nTrack: https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(m.tracking) : '\nFedEx tracking: to come')
+    + '\n\nFobs (' + m.fobs.length + '):\n'
+    + m.fobs.map(f => '  • FOB ID ' + f.fobId + ' · Fob number ' + (f.num || '—') + ' · Repair request ' + (f.sentWhen || '—') + ' · Shipped ' + m.shippedStr).join('\n')
+    + (m.received ? '\n\nReceived ' + fmtDT(m.received.receivedAt) + (m.received.receivedBy ? ' — marked by ' + m.received.receivedBy : '') : '');
+}
+function printShip(key){
+  const m = shipModel(key); if(!m) return;
+  document.getElementById('printArea').innerHTML =
+    '<div style="font-family:Arial,sans-serif;color:#1a202c;padding:10px;">'
+    + '<h1 style="font-size:21px;margin:0 0 2px;">Secure Alert — Shipment Sheet</h1>'
+    + '<div style="color:#4A5568;font-size:13px;margin-bottom:12px;">Loews Hotels Security Orlando · Contractor Portal</div>'
+    + '<p style="font-size:14px;"><b>Hotel:</b> ' + esc(m.hotels) + (m.tickets ? '<br><b>Ticket:</b> ' + esc(m.tickets) : '')
+    + '<br><b>Status:</b> ' + esc(m.statusLine)
+    + (m.tracking ? '<br><b>FedEx tracking:</b> ' + esc(m.tracking) : '') + '</p>'
+    + shipTableHtml(m)
+    + (m.received ? '<p style="font-size:14px;"><b>✓ Received</b> ' + esc(fmtDT(m.received.receivedAt)) + (m.received.receivedBy ? ' — marked by ' + esc(m.received.receivedBy) : '') + '</p>' : '')
+    + '<p style="color:#4A5568;font-size:12px;">Printed ' + esc(fmtDT(nowLocal())) + (contractorName ? ' by ' + esc(contractorName) : '') + '</p></div>';
+  window.print();
+}
+const EJ_KEY = 'YCkjMTWq2fP_OHNis', EJ_SERVICE = 'service_ylmlcxh', EJ_TPL_HTML = 'template_8171jco';
+async function sendShipEmail(key){
+  const m = shipModel(key); if(!m) return;
+  const idk = key.replace(/[^A-Za-z0-9]/g, '_');
+  const to = (document.getElementById('emto-' + idk) || {}).value || '';
+  const msg = document.getElementById('emmsg-' + idk);
+  if(!/@/.test(to)){ if(msg) msg.textContent = 'Type an email address first.'; return; }
+  if(msg) msg.textContent = 'Sending…';
+  const htmlBody = '<div style="font-family:Arial,sans-serif;font-size:14px;color:#1a202c"><h2 style="margin:0 0 6px;">Secure Alert shipment</h2>'
+    + '<p><b>Hotel:</b> ' + esc(m.hotels) + (m.tickets ? '<br><b>Ticket:</b> ' + esc(m.tickets) : '') + '<br><b>Status:</b> ' + esc(m.statusLine)
+    + (m.tracking ? '<br><b>FedEx tracking:</b> <a href="https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(m.tracking) + '">' + esc(m.tracking) + '</a>' : '') + '</p>'
+    + shipTableHtml(m)
+    + (m.received ? '<p><b>✓ Received</b> ' + esc(fmtDT(m.received.receivedAt)) + (m.received.receivedBy ? ' — marked by ' + esc(m.received.receivedBy) : '') + '</p>' : '')
+    + '<p style="color:#4A5568;font-size:12px;">Sent from the Secure Alert Contractor Portal' + (contractorName ? ' by ' + esc(contractorName) : '') + '.</p></div>';
+  try{
+    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ service_id: EJ_SERVICE, template_id: EJ_TPL_HTML, user_id: EJ_KEY,
+        template_params: { subject: 'Secure Alert shipment — ' + m.hotels + (m.tracking ? ' — FedEx ' + m.tracking : ''), body: htmlBody, to_email: to, name: contractorName || 'Contractor Portal', email: 'Jeremy.levin@loewshotels.com' } }) });
+    if(!res.ok) throw new Error('send failed');
+    if(msg) msg.textContent = '✓ Sent to ' + to;
+  }catch(e){
+    if(msg) msg.textContent = 'Could not send from here — opening your email app instead.';
+    setTimeout(() => { location.href = 'mailto:' + encodeURIComponent(to) + '?subject=' + encodeURIComponent('Secure Alert shipment — ' + m.hotels) + '&body=' + encodeURIComponent(shipText(m)); }, 600);
+  }
+}
+
+async function markReceived(tracking){
+  if(!confirm('Mark this shipment as received now? This stamps the date and time.')) return;
+  try{
+    await pull();  // fresh state first — never stamp onto a stale copy
+    let hit = 0;
+    S.fobs.forEach(f => { if(String(f.shipTracking || '').trim() === tracking && !f.receivedAt){ f.receivedAt = nowLocal(); f.receivedBy = contractorName; hit++; } });
+    if(!hit){ alert('This shipment was already marked received.'); render(); return; }
+    await push();
+    await pull();
+    render();
+  }catch(e){ alert('Could not save — check connection and try again.'); }
+}
+
+function viewFile(uid, i){
+  const f = S.fobs.find(x => x.uid === uid); if(!f || !f.files || !f.files[i]) return;
+  showDoc(f.files[i]);
+}
+function showDoc(dc){
+  document.getElementById('viewerName').textContent = dc.name || 'FedEx file';
+  const body = document.getElementById('viewerBody');
+  const open = document.getElementById('viewerOpen');
+  try{ open.href = URL.createObjectURL(dataToBlob(dc)); }catch(e){ open.href = dc.data || '#'; }
+  if((dc.type || '').indexOf('image/') === 0) body.innerHTML = '<img src="' + dc.data + '" alt="">';
+  else body.innerHTML = '<iframe src="' + dc.data + '"></iframe>';
+  document.getElementById('viewer').style.display = 'block';
+}
+function dataToBlob(dc){
+  const parts = String(dc.data || '').split(',');
+  const mime = (parts[0].match(/:(.*?);/) || [])[1] || dc.type || 'application/octet-stream';
+  const bin = atob(parts[1] || '');
+  const arr = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+function closeViewer(){ document.getElementById('viewer').style.display = 'none'; document.getElementById('viewerBody').innerHTML = ''; }
+
+async function boot(){
+  try{ await pull(); }catch(e){ document.getElementById('main').innerHTML = '<div class="card"><div class="empty">Could not load. Check connection and refresh.</div></div>'; return; }
+  /* The portal hands the login over in this page's address (?u=Name). */
+  const qm = /[?&]u=([^&]+)/.exec(location.search || '');
+  if(qm){ const qu = decodeURIComponent(qm[1]); if(S.team.some(t => t.name === qu)){ try{ localStorage.setItem('loewsUser', qu); localStorage.setItem('loewsAuth', '1'); }catch(e){} } }
+  const sso = localStorage.getItem('loewsUser') || '';
+  if(sso && S.team.some(t => t.name === sso)){ mode = 'team'; render(); return; }
+  if(contractorName && S.contractors.some(c => c.name === contractorName)){ mode = 'contractor'; render(); return; }
+  loginHtml('');
+}
+boot();
+setInterval(refresh, 60000);
+</script>
+<div id="printArea"></div>
+</body>
+</html>
